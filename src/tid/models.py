@@ -1,6 +1,14 @@
-from pydantic import BaseModel, HttpUrl,  Field
+from pydantic import BaseModel, HttpUrl,  Field, field_validator
+from sqlmodel import Field, SQLModel
 
-class ProjectModel(BaseModel):
+class ProjectBase(SQLModel):
     name: str = Field(min_length=1)
-    github_url: str = HttpUrl
+    github_url:  str
 
+    @field_validator("github_url")
+    def validate_gh(cls, v:str) -> str:
+        HttpUrl(v) # Raise ValueError if not url - SQLAlchemy has no URL type
+        return v
+
+class Project(ProjectBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
