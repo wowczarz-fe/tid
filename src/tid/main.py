@@ -1,12 +1,12 @@
 import typer 
 
-from tid.models import ProjectModel
+from tid.models import ProjectBase
 
 app = typer.Typer()
 
 @app.command()
 def project(name: str, github_url: str = ""):
-    project = ProjectModel(name=name, github_url=github_url)
+    project = ProjectBase(name=name, github_url=github_url)
     print(project.name)
 
 if __name__ == "__main__":
