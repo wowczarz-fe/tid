@@ -1,52 +1,34 @@
-import time 
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
+from time import monotonic, sleep
+from rich.console import Console
 from rich.live import Live
-from rich.console import Group
-from rich.text import Text
-from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
+from rich.spinner import Spinner
 
-def main():
-    second = 0
-    spinner = SpinnerColumn()
-    text = TextColumn("...")
-    timer = TimeElapsedColumn()
-    progress = Progress(spinner, text, timer, transient=True)
-    with progress:
-        try:
-            progress.add_task("")
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            pass
 
-def main():
-    from rich.panel import Panel
+def format_elapsed(seconds: int) -> str:
+    """
+    Format elapsed seconds
+    """    
+    h = seconds // 3600
+    m = (seconds % 3600) // 60
+    s = seconds % 60
+    return f"{h:02}:{m:02}:{s:02}"
 
-    second = 0
-    spinner = SpinnerColumn()
-    text = TextColumn("...")
-    timer = TimeElapsedColumn()
-    progress = Progress(spinner, text, timer, transient=True)
-    panel = Panel(progress, title="[bold]tid[/bold] – working", subtitle="Ctrl-C to close", subtitle_align="right")
+def render_text(project: str, task:str, start: int) -> str:
+    elapsed = int(monotonic() - start)
+    timer = format_elapsed(elapsed)
+    return f"[bold blue]{project}[/] [dim]|[/] {task} [blue]{timer}[/]"
 
-    with Live(panel, refresh_per_second=1, transient=True):
-        progress.add_task("", total=None)
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            pass
-def main():
-    progress = Progress(SpinnerColumn(), TimeElapsedColumn())
-    hint = Text("Press Ctrl-C to close watch (timer keeps running)", style="dim italic")
-    display = Group(progress, hint)
+def launch_timer(project, task):
+    console = Console()
+    start = monotonic()
+    spinner = Spinner("dots", style="blue")
+    with Live(spinner, console=console, refresh_per_second=12) as live:
+        while True:
+            sleep(0.1)
+            spinner.update(text=render_text(project, task, start))
+            live.refresh()
 
-    with Live(display, refresh_per_second=1, transient=True):
-      progress.add_task("", total=None)
-      try:
-          while True:
-              time.sleep(1)
-      except KeyboardInterrupt:
-          pass
 if __name__ == "__main__":
-    main()
+    project = "My Project"
+    task = "Design timer"
+    launch_timer(project, task)    #
